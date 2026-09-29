@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyIngestSignature } from "@/lib/hmac";
-import { applyEvents } from "@/lib/ingest";
+import { applyEvents, reprojectAll } from "@/lib/ingest";
 import { isDemoMode } from "@/lib/db";
 import type { IngestEvent } from "@/lib/types";
 
@@ -30,6 +30,11 @@ export async function POST(req: NextRequest) {
   });
   if (!check.ok) {
     return NextResponse.json({ error: check.reason }, { status: check.status });
+  }
+
+  // Signed maintenance command: rebuild runs from stored events (same HMAC as ingest).
+  if ((body as { reproject?: boolean }).reproject === true) {
+    return NextResponse.json(await reprojectAll(), { status: 200 });
   }
 
   const events: IngestEvent[] = body.events

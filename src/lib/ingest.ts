@@ -3,6 +3,9 @@ import { getPg, isPostgres } from "./db-pg";
 import { defectFingerprint } from "./fingerprint";
 import { ensureReady, nextEventSeq } from "./store";
 import type { IngestEvent } from "./types";
+import type postgres from "postgres";
+
+type Pg = postgres.Sql | postgres.TransactionSql;
 
 export async function applyEvents(
   events: IngestEvent[],
@@ -26,7 +29,8 @@ function applyEventsSqlite(events: IngestEvent[]): {
         duplicates += 1;
         continue;
       }
-      const seq = ev.seq || nextSeqSqlite(db);
+      // Always server-assigned: producer seq (0/1/100) is not a global order and broke SSE resume + ORDER BY seq.
+      const seq = nextSeqSqlite(db);
       db.prepare(
         `INSERT INTO run_events (event_id, run_id, type, ts, seq, payload, received_at)
          VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -55,23 +59,62 @@ async function applyEventsPg(events: IngestEvent[]): Promise<{
   let accepted = 0;
   let duplicates = 0;
   for (const ev of events) {
-    const existing = await sql`SELECT 1 FROM run_events WHERE event_id = ${ev.event_id}`;
-    if (existing.length) {
-      duplicates += 1;
-      continue;
-    }
-    const seq = ev.seq || (await nextEventSeq());
-    await sql`
-      INSERT INTO run_events (event_id, run_id, type, ts, seq, payload, received_at)
-      VALUES (
-        ${ev.event_id}, ${ev.run_id}, ${ev.type}, ${ev.ts}, ${seq},
-        ${sql.json((ev.payload || {}) as Parameters<typeof sql.json>[0])}, ${new Date().toISOString()}
-      )
-    `;
-    await projectPg(ev);
-    accepted += 1;
+    // Insert + projection in ONE transaction. Before, the row was inserted first and projected afterwards; a timeout
+    // or error in between left the event stored-but-unapplied, and every retry was then skipped as a "duplicate"
+    // (29 Sep: all started/finished events of the QA bot's runs were lost this way).
+    const inserted = await sql.begin(async (tx) => {
+      await tx`SELECT pg_advisory_xact_lock(4242)`; // serialise seq assignment
+      const existing = await tx`SELECT 1 FROM run_events WHERE event_id = ${ev.event_id}`;
+      if (existing.length) return false;
+      const [row] = await tx<{ m: number }[]>`SELECT COALESCE(MAX(seq), 0)::int AS m FROM run_events`;
+      await tx`
+        INSERT INTO run_events (event_id, run_id, type, ts, seq, payload, received_at)
+        VALUES (
+          ${ev.event_id}, ${ev.run_id}, ${ev.type}, ${ev.ts}, ${row.m + 1},
+          ${tx.json((ev.payload || {}) as Parameters<typeof tx.json>[0])}, ${new Date().toISOString()}
+        )
+      `;
+      await projectPg(ev, tx);
+      return true;
+    });
+    if (inserted) accepted += 1;
+    else duplicates += 1;
   }
   return { accepted, duplicates };
+}
+
+const TYPE_ORDER: Record<string, number> = { "suite.queued": 0, "suite.started": 1, "suite.progress": 2 };
+
+/** Rebuild suite_runs / defects from the stored events (repairs events that were stored but never applied). */
+export async function reprojectAll(): Promise<{ events: number }> {
+  await ensureReady();
+  if (!isPostgres()) {
+    const db = getDb();
+    const rows = db.prepare("SELECT event_id, run_id, type, ts, seq, payload FROM run_events").all() as Record<string, unknown>[];
+    const evs = rows.map(toEvent).sort(byTime);
+    db.transaction(() => evs.forEach((ev) => projectSqlite(db, ev)))();
+    return { events: evs.length };
+  }
+  const sql = getPg();
+  const rows = await sql<Record<string, unknown>[]>`SELECT event_id, run_id, type, ts, seq, payload FROM run_events`;
+  const evs = rows.map(toEvent).sort(byTime);
+  await sql.begin(async (tx) => {
+    for (const ev of evs) await projectPg(ev, tx);
+  });
+  return { events: evs.length };
+}
+
+function toEvent(r: Record<string, unknown>): IngestEvent {
+  const payload = typeof r.payload === "string" ? JSON.parse(r.payload as string) : (r.payload as Record<string, unknown>);
+  const ts = r.ts instanceof Date ? r.ts.toISOString() : String(r.ts);
+  return { event_id: String(r.event_id), run_id: String(r.run_id), type: String(r.type), ts, seq: Number(r.seq), payload: payload || {} };
+}
+
+function byTime(a: IngestEvent, b: IngestEvent): number {
+  const t = Date.parse(a.ts) - Date.parse(b.ts);
+  if (t) return t;
+  const o = (TYPE_ORDER[a.type] ?? 3) - (TYPE_ORDER[b.type] ?? 3);
+  return o || a.seq - b.seq;
 }
 
 function projectSqlite(db: ReturnType<typeof getDb>, ev: IngestEvent): void {
@@ -180,8 +223,7 @@ function projectSqlite(db: ReturnType<typeof getDb>, ev: IngestEvent): void {
   }
 }
 
-async function projectPg(ev: IngestEvent): Promise<void> {
-  const sql = getPg();
+async function projectPg(ev: IngestEvent, sql: Pg = getPg()): Promise<void> {
   const p = ev.payload || {};
   const now = new Date().toISOString();
   if (ev.type === "suite.queued" || ev.type === "suite.started") {
