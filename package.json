@@ -1,0 +1,45 @@
+{
+  "name": "qa-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev:real",
+    "dev:real": "DEMO_MODE=0 next dev",
+    "dev:demo": "DEMO_MODE=1 INGEST_SECRET=demo-ingest-secret next dev",
+    "build": "next build",
+    "start": "DEMO_MODE=0 next start",
+    "lint": "eslint",
+    "db:migrate": "tsx scripts/migrate.ts",
+    "db:seed": "DEMO_MODE=1 tsx scripts/seed.ts",
+    "test": "node --import tsx --test src/lib/*.test.ts",
+    "import:events": "tsx scripts/import-events.ts",
+    "smoke": "node scripts/ui-smoke.mjs"
+  },
+  "dependencies": {
+    "lucide-react": "^1.48.0",
+    "next": "15.5.19",
+    "postgres": "^3.4.9",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "uuid": "^14.0.2",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/uuid": "^10.0.0",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.19",
+    "playwright": "^1.52.0",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.15",
+    "typescript": "^5"
+  },
+  "optionalDependencies": {
+    "better-sqlite3": "^13.0.3"
+  }
+}

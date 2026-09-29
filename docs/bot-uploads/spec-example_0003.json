@@ -1,0 +1,237 @@
+{
+ "id": "4561361234",
+ "title": "Sticky ATC bundle total (SXM150) — Round 4 validation",
+ "component": "sticky ATC price with add-ons (SXM150), round 4",
+ "task_url": "https://www.wrike.com/open.htm?id=4561361234",
+ "preview": "207441527126 (fix/sticky-atc-bundle-total-4561361234, round 4)",
+ "pr": "https://github.com/sportstechbrands/shop-theme/pull/76",
+ "run_time": "23 Sep 2026, 15:28–15:34 CEST",
+ "tested": "iPhone WebKit 390 px, Android Chrome 375 px, desktop Chrome 1440 px, desktop Safari 1280 px; DE, DE-AT, DE-CH (CHF), ES, FR, IT, NL on iPhone and desktop Chrome, with and without add-ons ticked. These are Playwright emulations, not a real iOS device.",
+ "verdict": "READY",
+ "verdict_detail": "all acceptance criteria pass; round-3 defect (German monthly-rate line) fixed; no open defects",
+ "fail": [],
+ "defects": [],
+ "warn": [],
+ "passed": [
+  "<b>Fixed: monthly-rate line translated</b>, also after ticking add-ons (DevBot had not clicked this): ES \"O desde 108,25 €/mes\" → \"O desde 127,25 €/mes\"; FR \"Ou à partir de 108,25 €/mois\" → \"126,42 €/mois\"; IT \"Oppure da 108,25 €/mese\" → \"127,25 €/mese\"; NL \"Of vanaf 124,91 €/maand\" → \"144,75 €/maand\"; DE/AT/CH keep \"Oder ab …/Monat\". Checked on iPhone and desktop Chrome in every locale",
+  "Round-3 fix still in place: no \"€CHF\" (CH \"CHF 1,129.00\" → \"CHF 1,337.00\"); sticky price format matches the main price and cart in every locale",
+  "Add-on sums: SXM150 + Monolift = 1.258,99 €, + Beinhalterung = 1.287,98 €; strike 1.603,80 € → 1.638,60 €; monthly 104,92 € → 107,33 €; 16/16 device-locale runs match the expected sums; unticking returns to base; main PDP price unchanged",
+  "Cart total equals the sticky total after add-to-cart: DE 1.287,98 € (iPhone + Android), AT 1.377,00 €, CH 1,337.00 CHF, ES 1.527,00 €, NL 1.737,00 €",
+  "Live still shows the old behaviour (sticky stays \"€1.099,00\", German rate line), confirming the preview is what fixes it"
+ ],
+ "open": "real iOS device check; re-check by Frontend Test (DevBot). After merge, the CH live defect https://www.wrike.com/open.htm?id=4565333590 can be re-checked on live and closed.",
+ "matrix": {
+  "head": [
+   "Device",
+   "Locale",
+   "Theme",
+   "Both add-ons (sale / strike / monthly)",
+   "Sticky price text",
+   "Monthly-rate text (base → both add-ons)",
+   "Cart total"
+  ],
+  "rows": [
+   [
+    "MOB-Safari",
+    "de",
+    "live",
+    "✗ 1.099,00 / 1.411,80 / 91,58",
+    "⚠ €1.099,00*",
+    "✓ Oder ab 91,58 €/Monat → 91,58 €/Monat",
+    "✓ 1.287,98 EUR"
+   ],
+   [
+    "DSK-Chrome",
+    "de",
+    "live",
+    "✗ 1.099,00 / 1.411,80 / 91,58",
+    "⚠ €1.099,00*",
+    "✓ Oder ab 91,58 €/Monat → 91,58 €/Monat",
+    "— (not run)"
+   ],
+   [
+    "MOB-Safari",
+    "de",
+    "preview",
+    "✓ 1.287,98 / 1.638,60 / 107,33",
+    "✓ 1.287,98 €*",
+    "✓ Oder ab 91,58 €/Monat → 107,33 €/Monat",
+    "✓ 1.287,98 EUR"
+   ],
+   [
+    "MOB-Safari",
+    "de-at",
+    "preview",
+    "✓ 1.377,00 / 1.747,00 / 114,75",
+    "✓ 1.377,00 €*",
+    "✓ Oder ab 97,41 €/Monat → 114,75 €/Monat",
+    "✓ 1.377,00 EUR"
+   ],
+   [
+    "MOB-Safari",
+    "de-ch",
+    "preview",
+    "✓ 1.337,00 / 1.667,00 / 111,42",
+    "✓ CHF 1,337.00*",
+    "✓ Oder ab CHF 94.08/Monat → CHF 111.42/Monat",
+    "✓ 1.337,00 CHF"
+   ],
+   [
+    "MOB-Safari",
+    "es-es",
+    "preview",
+    "✓ 1.527,00 / 1.767,99 / 127,25",
+    "✓ 1.527,00 €*",
+    "✓ O desde 108,25 €/mes → 127,25 €/mes",
+    "✓ 1.527,00 EUR"
+   ],
+   [
+    "MOB-Safari",
+    "fr-fr",
+    "preview",
+    "✓ 1.517,00 / 1.758,98 / 126,42",
+    "✓ 1.517,00 €*",
+    "✓ Ou à partir de 108,25 €/mois → 126,42 €/mois",
+    "— (not run)"
+   ],
+   [
+    "MOB-Safari",
+    "it-it",
+    "preview",
+    "✓ 1.527,00 / 1.767,99 / 127,25",
+    "✓ 1.527,00 €*",
+    "✓ Oppure da 108,25 €/mese → 127,25 €/mese",
+    "— (not run)"
+   ],
+   [
+    "MOB-Safari",
+    "nl-nl",
+    "preview",
+    "✓ 1.737,00 / 2.007,99 / 144,75",
+    "✓ 1.737,00 €*",
+    "✓ Of vanaf 124,91 €/maand → 144,75 €/maand",
+    "✓ 1.737,00 EUR"
+   ],
+   [
+    "MOB-Chrome",
+    "de",
+    "preview",
+    "✓ 1.287,98 / 1.638,60 / 107,33",
+    "✓ 1.287,98 €*",
+    "✓ Oder ab 91,58 €/Monat → 107,33 €/Monat",
+    "✓ 1.287,98 EUR"
+   ],
+   [
+    "DSK-Chrome",
+    "de",
+    "preview",
+    "✓ 1.287,98 / 1.638,60 / 107,33",
+    "✓ 1.287,98 €*",
+    "✓ Oder ab 91,58 €/Monat → 107,33 €/Monat",
+    "— (not run)"
+   ],
+   [
+    "DSK-Chrome",
+    "de-at",
+    "preview",
+    "✓ 1.377,00 / 1.747,00 / 114,75",
+    "✓ 1.377,00 €*",
+    "✓ Oder ab 97,41 €/Monat → 114,75 €/Monat",
+    "— (not run)"
+   ],
+   [
+    "DSK-Chrome",
+    "de-ch",
+    "preview",
+    "✓ 1.337,00 / 1.667,00 / 111,42",
+    "✓ CHF 1,337.00*",
+    "✓ Oder ab CHF 94.08/Monat → CHF 111.42/Monat",
+    "— (not run)"
+   ],
+   [
+    "DSK-Chrome",
+    "es-es",
+    "preview",
+    "✓ 1.527,00 / 1.767,99 / 127,25",
+    "✓ 1.527,00 €*",
+    "✓ O desde 108,25 €/mes → 127,25 €/mes",
+    "— (not run)"
+   ],
+   [
+    "DSK-Chrome",
+    "fr-fr",
+    "preview",
+    "✓ 1.517,00 / 1.758,98 / 126,42",
+    "✓ 1.517,00 €*",
+    "✓ Ou à partir de 108,25 €/mois → 126,42 €/mois",
+    "— (not run)"
+   ],
+   [
+    "DSK-Chrome",
+    "it-it",
+    "preview",
+    "✓ 1.527,00 / 1.767,99 / 127,25",
+    "✓ 1.527,00 €*",
+    "✓ Oppure da 108,25 €/mese → 127,25 €/mese",
+    "— (not run)"
+   ],
+   [
+    "DSK-Chrome",
+    "nl-nl",
+    "preview",
+    "✓ 1.737,00 / 2.007,99 / 144,75",
+    "✓ 1.737,00 €*",
+    "✓ Of vanaf 124,91 €/maand → 144,75 €/maand",
+    "— (not run)"
+   ],
+   [
+    "DSK-Safari",
+    "de",
+    "preview",
+    "✓ 1.287,98 / 1.638,60 / 107,33",
+    "✓ 1.287,98 €*",
+    "✓ Oder ab 91,58 €/Monat → 107,33 €/Monat",
+    "— (not run)"
+   ]
+  ]
+ },
+ "sections": [
+  {
+   "title": "Translated monthly-rate line with add-ons — iPhone (preview)",
+   "cols": 2,
+   "images": [
+    [
+     "evidence/20260923-1330-MOB-Safari-preview-es-es-sticky-plus2.png",
+     "ES-ES · both add-ons"
+    ],
+    [
+     "evidence/20260923-1332-MOB-Safari-preview-nl-nl-sticky-plus2.png",
+     "NL-NL · both add-ons"
+    ],
+    [
+     "evidence/20260923-1330-MOB-Safari-preview-de-ch-sticky-plus2.png",
+     "DE-CH · both add-ons"
+    ],
+    [
+     "evidence/20260923-1329-MOB-Safari-preview-de-sticky-plus2.png",
+     "DE · both add-ons"
+    ]
+   ]
+  },
+  {
+   "title": "Before (live) / after — iPhone DE",
+   "cols": 2,
+   "break": false,
+   "images": [
+    [
+     "evidence/20260923-1328-MOB-Safari-live-de-sticky-plus2.png",
+     "BEFORE · live · both add-ons ticked"
+    ],
+    [
+     "evidence/20260923-1329-MOB-Safari-preview-de-sticky-plus2.png",
+     "AFTER · preview · both add-ons"
+    ]
+   ]
+  }
+ ]
+}

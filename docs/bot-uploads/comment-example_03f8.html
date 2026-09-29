@@ -1,0 +1,18 @@
+<b>QA validation: sticky ATC price with add-ons (SXM150), round 4</b><br>
+Preview theme 207441527126 (fix/sticky-atc-bundle-total-4561361234, round 4), compared with live · 23 Sep 2026, 15:28–15:34 CEST<br>
+Tested on: iPhone WebKit 390 px, Android Chrome 375 px, desktop Chrome 1440 px, desktop Safari 1280 px; DE, DE-AT, DE-CH (CHF), ES, FR, IT, NL on iPhone and desktop Chrome, with and without add-ons ticked. These are Playwright emulations, not a real iOS device.<br>
+<br>
+<b>Result: READY – all acceptance criteria pass; round-3 defect (German monthly-rate line) fixed; no open defects</b><br>
+<br>
+✅ <b>Passed</b><br>
+• <b>Fixed: monthly-rate line translated</b>, also after ticking add-ons (DevBot had not clicked this): ES "O desde 108,25 €/mes" → "O desde 127,25 €/mes"; FR "Ou à partir de 108,25 €/mois" → "126,42 €/mois"; IT "Oppure da 108,25 €/mese" → "127,25 €/mese"; NL "Of vanaf 124,91 €/maand" → "144,75 €/maand"; DE/AT/CH keep "Oder ab …/Monat". Checked on iPhone and desktop Chrome in every locale<br>
+• Round-3 fix still in place: no "€CHF" (CH "CHF 1,129.00" → "CHF 1,337.00"); sticky price format matches the main price and cart in every locale<br>
+• Add-on sums: SXM150 + Monolift = 1.258,99 €, + Beinhalterung = 1.287,98 €; strike 1.603,80 € → 1.638,60 €; monthly 104,92 € → 107,33 €; 16/16 device-locale runs match the expected sums; unticking returns to base; main PDP price unchanged<br>
+• Cart total equals the sticky total after add-to-cart: DE 1.287,98 € (iPhone + Android), AT 1.377,00 €, CH 1,337.00 CHF, ES 1.527,00 €, NL 1.737,00 €<br>
+• Live still shows the old behaviour (sticky stays "€1.099,00", German rate line), confirming the preview is what fixes it<br>
+<br>
+<b>Still open:</b> real iOS device check; re-check by Frontend Test (DevBot). After merge, the CH live defect https://www.wrike.com/open.htm?id=4565333590 can be re-checked on live and closed.<br>
+<b>Evidence:</b> PDF attached (6 screenshots).<br>
+<br>
+<a class="stream-user-id avatar" rel="KUAZALYY">@DEV BOT Shopify</a> <a class="stream-user-id avatar" rel="KUAA5RAF">@Ali Ahmad</a> <a class="stream-user-id avatar" rel="KUALY52K">@santhana Bharathy</a> <a class="stream-user-id avatar" rel="KUAWBEFH">@Jonas Müller</a><br>
+— QA Automation Bot

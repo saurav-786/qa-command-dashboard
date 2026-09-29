@@ -1,0 +1,6 @@
+{
+  "open": ["Active", "New"],
+  "in_progress": ["In Progress", "In Review", "Waiting for Feedback"],
+  "done": ["Completed"],
+  "wont_fix": ["Cancelled", "Deferred"]
+}

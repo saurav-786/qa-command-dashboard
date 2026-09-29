@@ -1,0 +1,13 @@
+{
+  "framework": "nextjs",
+  "regions": ["fra1"],
+  "headers": [
+    {
+      "source": "/api/stream",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, no-transform" },
+        { "key": "Connection", "value": "keep-alive" }
+      ]
+    }
+  ]
+}
